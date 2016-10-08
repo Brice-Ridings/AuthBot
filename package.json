@@ -1,0 +1,14 @@
+{
+  "name": "authbot",
+  "version": "1.0.0",
+  "description": "Slackbot for auth0 accounts ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Brice Ridings",
+  "license": "ISC",
+  "dependencies": {
+    "botkit": "^0.4.0"
+  }
+}
