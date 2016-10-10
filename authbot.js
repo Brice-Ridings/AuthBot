@@ -1,5 +1,12 @@
 var Botkit = require('botkit');
-var config = require('./config');
+var config = require('./config.js');
+var dialog = require('./dialog.js');
+var os = require('os');
+
+if (!config.token) {
+    console.log('Error: Specify token in environment');
+    process.exit(1);
+}
 
 var controller = Botkit.slackbot({
   debug: false
@@ -9,13 +16,31 @@ var controller = Botkit.slackbot({
 
 // connect the bot to a stream of messages
 controller.spawn({
-  token: config.bot,
-}).startRTM()
+  token: config.token,
+}).startRTM();
 
-// give the bot something to listen for.
-controller.hears('hello',['direct_message','direct_mention','mention'],function(bot,message) {
+// Bot conversation
+controller.hears(['hello','hi'],['direct_message','direct_mention','mention'],function(bot,message) {
 
-  bot.reply(message,'hello');
+    controller.storage.users.get(message.user, function(err, user){
+      if(user && user.name){
+        bot.reply(message, 'Hello' + user.name + '!!');
+      }else{
+        bot.reply(message, 'Hello.');
+      }
+    });
+});
+
+controller.hears(['help','who are you','what do you do', 'identify yourself'], ['direct_message','direct_mention','mention'], function(bot,message){
+
+  bot.reply(message,dialog.introduction)
+
+});
+
+// Create account xxxxxx
+contoller.hears('create account (.*)', ['direct_message','direct_mention','mention'], function(bot,message){
+
+  var account = match[1];
 
 
 });

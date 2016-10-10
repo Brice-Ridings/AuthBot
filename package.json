@@ -9,6 +9,7 @@
   "author": "Brice Ridings",
   "license": "ISC",
   "dependencies": {
-    "botkit": "^0.4.0"
+    "botkit": "^0.4.0",
+    "request": "^2.75.0"
   }
 }
