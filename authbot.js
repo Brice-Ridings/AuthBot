@@ -2,15 +2,12 @@ var Botkit = require('botkit');
 var config = require('./config.js');
 var dialog = require('./dialog.js');
 var os = require('os');
-var Regex = require('Regex')
+var request = require('request');
 
-var accountReq = new Regex('^[A-Za-z0-9\-]+wkr|api$');
+var accountReq = '^[A-Za-z0-9\-]+wkr|api$';
 
-var testString = 'rebates-submission-master-api';
+var G
 
-if(accountReq.test(testString)){
-  console.log("well that works");
-}
 
 if (!config.token) {
     console.log('Error: Specify token in environment');
@@ -48,14 +45,33 @@ controller.hears(['help','who are you','what do you do', 'identify yourself'], [
 // Create account xxxxxx
 controller.hears('create account (.*)', ['direct_message','direct_mention','mention'], function(bot,message){
 
-  bot.reply(message, "got it: ");
   var account = message.match[1];
-  bot.reply(message, account);
 
   // Check to see if account matches the expected value...
-  if(accountReq.test(account) == true){
-    bot.replay(message, "matched");  }
+  if(account.match(accountReq)){
+
+    bot.reply(message, "Got it! one moment...")
+    accountName = 'dev-' + account;
+
+    // Create request call
+    var createAccountOptions = {
+      url: 'https://rebates-auth0-account-api.ops.aws-nonprod.psn.inmar.com/api/v1/account/internal/' + accountName,
+      method: 'POST'
+    }
+
+    request(createAccountOptions, function(error, response, body){
+      if(!error && response.statusCode == '201'){
+        var responseBody = JSON.parse(body);
+        bot.reply(message, 'Here you are!' +  '\n' + '>>> AccountName: ' + responseBody.account.appName + '\n' + 'Password: ' + responseBody.account.password);
+      }
+      else{
+        bot.reply(message,"Error "+response.statusCode+": "+JSON.parse(body));
+      }
+    })
+
+
+  }
   else{
-    bot.reply(message,"The account provided does not match the naming requirments ");
+    bot.reply(message,"The account provided does not match the naming requirments");
   }
 });
