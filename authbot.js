@@ -2,6 +2,15 @@ var Botkit = require('botkit');
 var config = require('./config.js');
 var dialog = require('./dialog.js');
 var os = require('os');
+var Regex = require('Regex')
+
+var accountReq = new Regex('^[A-Za-z0-9\-]+wkr|api$');
+
+var testString = 'rebates-submission-master-api';
+
+if(accountReq.test(testString)){
+  console.log("well that works");
+}
 
 if (!config.token) {
     console.log('Error: Specify token in environment');
@@ -32,15 +41,21 @@ controller.hears(['hello','hi'],['direct_message','direct_mention','mention'],fu
 });
 
 controller.hears(['help','who are you','what do you do', 'identify yourself'], ['direct_message','direct_mention','mention'], function(bot,message){
-
-  bot.reply(message,dialog.introduction)
+  bot.reply(message,dialog.introduction);
 
 });
 
 // Create account xxxxxx
-contoller.hears('create account (.*)', ['direct_message','direct_mention','mention'], function(bot,message){
+controller.hears('create account (.*)', ['direct_message','direct_mention','mention'], function(bot,message){
 
-  var account = match[1];
+  bot.reply(message, "got it: ");
+  var account = message.match[1];
+  bot.reply(message, account);
 
-
+  // Check to see if account matches the expected value...
+  if(accountReq.test(account) == true){
+    bot.replay(message, "matched");  }
+  else{
+    bot.reply(message,"The account provided does not match the naming requirments ");
+  }
 });
