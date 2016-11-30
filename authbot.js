@@ -1,12 +1,9 @@
 var Botkit = require('botkit');
 var config = require('./config.js');
-var dialog = require('./dialog.js');
 var os = require('os');
 var request = require('request');
 
 var accountReq = '^[A-Za-z0-9\-]+wkr|api$';
-
-var G
 
 
 if (!config.token) {
@@ -38,8 +35,9 @@ controller.hears(['hello','hi'],['direct_message','direct_mention','mention'],fu
 });
 
 controller.hears(['help','who are you','what do you do', 'identify yourself'], ['direct_message','direct_mention','mention'], function(bot,message){
-  bot.reply(message,dialog.introduction);
-
+  bot.reply(message,':robot_face:I am authbot, a slackbot built for handling auth0 accounts within the Inmar custom database.\n'
+  +'Currently I only have one job so I\'ll likely not fail!\n'
+  +'Just tell me to \"*create account .....*\" and I\'ll create a new dev auth0 account');
 });
 
 // Create account xxxxxx
@@ -55,7 +53,7 @@ controller.hears('create account (.*)', ['direct_message','direct_mention','ment
 
     // Create request call
     var createAccountOptions = {
-      url: 'https://rebates-auth0-account-api.ops.aws-nonprod.psn.inmar.com/api/v1/account/internal/' + accountName,
+      url: config.url + accountName,
       method: 'POST'
     }
 
@@ -64,11 +62,13 @@ controller.hears('create account (.*)', ['direct_message','direct_mention','ment
         var responseBody = JSON.parse(body);
         bot.reply(message, 'Here you are!' +  '\n' + '>>> AccountName: ' + responseBody.account.appName + '\n' + 'Password: ' + responseBody.account.password);
       }
+      else if(response.statusCode == 504 || response.statusCode == 404){
+        bot.reply(message,"Well this is embarrassing... Seems the service is unavaliable and I recieved a status code of " + response.statusCode);
+      }
       else{
         bot.reply(message,"Error "+response.statusCode+": "+JSON.parse(body));
       }
     })
-
 
   }
   else{
